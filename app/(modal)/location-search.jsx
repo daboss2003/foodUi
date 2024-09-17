@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList} from 'react-native';
 import React, { useState } from 'react';
-import MapView,{UrlTile, Marker} from 'react-native-maps';
+import MapView,{UrlTile, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import Colors from '../../constants/Colors';
 import { useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,9 +19,13 @@ const LocationSearch = () => {
   const [sugestions, setSugestios] = useState([])
 
   async function fetchSugestion(query) {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
-    const data = await response.json()
-    setSugestios(data)
+    try{
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
+      const data = await response.json()
+      setSugestios(data)
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   function handleSuggestionPress(item) {
@@ -68,7 +72,7 @@ const LocationSearch = () => {
           <Text onPress={() => handleSuggestionPress(item)} style={styles.queryText}>{item?.display_name }</Text>
         )}
       />
-      <MapView showsUserLocation={true} style={styles.map} region={location} >
+      <MapView showsUserLocation style={styles.map} region={location} onRegionChangeComplete={(newRegion) => setLocation(newRegion)} provider={PROVIDER_GOOGLE}>
         <UrlTile urlTemplate='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' maximumZ={19} /> 
         {selectedLocation && (<Marker coordinate={selectedLocation} />)}
       </MapView>
